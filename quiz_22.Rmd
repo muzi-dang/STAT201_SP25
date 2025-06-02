@@ -1,0 +1,88 @@
+---
+title: "Quiz 22"
+subtitle: "STAT 201"
+author: "Muzi Dang"
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+
+execute:
+  message: false
+  warning: false
+---
+Download the file capital_cities.csv from here. Make sure the file is in your current working directory. Execute the following code to obtain the objects coordinates_capital_cities and country_names.
+
+The object country_names is an atomic vector consisting of country names. The object coordinates_capital_cities is a matrix consisting of the latitude-longitude pair of the capital city of the respective country. The order of countries in country_names is the same as the order in which their capital city coordinates (latitude-longitude) appear in the matrix coordinates_capital_cities.
+
+13.6.2.1 Top 10 countries closest to DC
+Print the names of the countries of the top 10 capital cities closest to the US capital - Washington DC.
+
+Create and print a matrix containing the coordinates of the top 10 capital cities closest to Washington DC.
+
+Note that:
+
+The Country Name for US is given as United States in the data.
+The ‘closeness’ of capital cities from the US capital is based on the Euclidean distance of their coordinates to those of the US capital.
+The dataset includes two records: United States and US Minor Outlying Islands, both belonging to the U.S., with a distance of zero. These records must be excluded to accurately identify the closest foreign capital cities.
+Hint:
+
+Get the coordinates of Washington DC from coordinates_capital_cities. The row that contains the coordinates of DC will have the same index as United States has in the vector country_names
+
+Create a matrix that has coordinates of Washington DC in each row, and has the same number of rows as the matrix coordinates_capital_cities.
+
+Subtract coordinates_capital_cities from the matrix created in (2). Element-wise subtraction will occur between the matrices.
+
+Use the apply() function on the matrix obtained above to find the Euclidean distance of Washington DC from the rest of the capital cities.
+
+Using the distances obtained above, find the country that has the closest capital to DC (Euclidean distance > 0).
+
+Top 10 countries with capitals closest to Washington DC are the following:
+
+You can also use the following code to exclude the U.S. records
+
+The coordinates of the top 10 capital cities closest to Washington DC are:
+
+
+
+Matrix Approach:
+```{r}
+data <- read.csv("capital_cities(in).csv")
+country_names <- data$Country.Name
+coordinates_capital_cities <- cbind(data$Capital.Latitude, data$Capital.Longitude)
+
+us_index <- c(which(country_names == "United States"), which(country_names == "US Minor Outlying Islands"))
+
+us_cord <- coordinates_capital_cities[which(country_names == "United States"), ]
+
+country_names <- country_names[-us_index]
+coordinates_capital_cities <- coordinates_capital_cities[-us_index, ]
+
+dc_mat <- matrix(us_cord, nrow = nrow(coordinates_capital_cities), ncol = 2, byrow = TRUE)
+distance_mat <- coordinates_capital_cities - dc_mat
+distances <- apply(distance_mat, 1, function(x) sqrt(sum(x^2)))
+
+print(country_names[order(distances)[1:10]])
+
+```
+
+Data Frame Approach:
+```{r}
+df <- data.frame(
+  Name = data$Country.Name,
+  Lat = data$Capital.Latitude,
+  Long = data$Capital.Longitude
+)
+
+us_index <- c((which(df$Name =="United States")), (which(df$Name == "US Minor Outlying Islands")))
+df <- df[-us_index, ]
+
+us_lat <- data$Capital.Latitude[which(data$Country.Name == "United States")]
+us_long <- data$Capital.Longitude[which(data$Country.Name == "United States")]
+
+df$Distance <- sqrt((df$Lat - us_lat)^2 + (df$Long - us_long)^2)
+
+print(df$Name[order(df$Distance)[1:10]])
+
+```
